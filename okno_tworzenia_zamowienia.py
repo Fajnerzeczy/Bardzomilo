@@ -1,6 +1,5 @@
 from tkinter import *
 import sqlite3
-import os
 
 
 def ekran_tworzenia_zamowienia(okno):
@@ -49,9 +48,9 @@ def ekran_tworzenia_zamowienia(okno):
     Label(okno_tworzenia_zamowien, text='Rejestracja', font=('Arial', 11)).place(x=12, y=160)
     pole_nr_rej = Entry(okno_tworzenia_zamowien, textvariable=nr_rej)
     pole_nr_rej.place(x=90, y=164)
-    Label(okno_tworzenia_zamowien, text='Opis', font=('Arial', 11)).place(x=360, y=10)
-    pole_opisu = Text(okno_tworzenia_zamowien, width=40, height=7, font=('Arial', 11))  # to jest jakies zjebane
-    retrive_input(pole_opisu)
+    Label(okno_tworzenia_zamowien, text='Krotki opis (50 znakow)', font=('Arial', 11)).place(x=360, y=10)
+    pole_opisu = Entry(okno_tworzenia_zamowien, width=50, textvariable=opis)
+    opis.trace('w', lambda *args: limit_znakow_opis(opis))
     pole_opisu.place(x=360, y=40)
     Button(okno_tworzenia_zamowien, text='Dodaj', command=dodaj_do_bazy).place(x=640, y=360)
     Button(okno_tworzenia_zamowien, text='Anuluj', command=wroc).place(x=560, y=360)
@@ -62,6 +61,7 @@ def wroc():
     global okno_anulowania
     okno_anulowania = Toplevel(okno_tworzenia_zamowien)
     okno_anulowania.geometry('200x60')
+    okno_anulowania.resizable(False, False)
     Label(okno_anulowania, text='Czy chcesz anulowac zamowienie?').pack()
     Button(okno_anulowania, text='Tak', command=usun_wroc_tak).place(x=50, y=30)
     Button(okno_anulowania, text='Nie', command= usun_wroc_nie).place(x=120, y=30)
@@ -92,9 +92,9 @@ def limit_znakow_telefon(pole):
         pole.set(pole.get()[:9])
 
 
-def retrive_input(pole):
-    opis = pole.get('1.0', 'end+1c')
-
+def limit_znakow_opis(pole):
+    if len(pole.get()) > 0:
+        pole.set(pole.get()[:50])
 
 # Laczenie z baza
 def dodaj_do_bazy():
@@ -109,11 +109,12 @@ def dodaj_do_bazy():
     with polacz:
         kursor = polacz.cursor()
         kursor.execute('INSERT INTO Zamowienia(Nazwisko,Telefon,Vin,Marka,Model,Nr_rej,Opis) VALUES(?,?,?,?,?,?,?)',
-                       (nazwisko1, telefon1, vin1, marka1, model1, nr_rej1, opis1))
+                       (nazwisko1, telefon1, vin1, marka1, model1, nr_rej1,opis1))
         kursor.close()
     # Popout
     global okno_dodania
     okno_dodania = Toplevel(okno_tworzenia_zamowien)
-    okno_dodania.geometry('200x60')
+    okno_dodania.geometry('200x70')
+    okno_dodania.resizable(False, False)
     Label(okno_dodania, text='Pomyslnie dodano zamowienie\n').pack()
     Button(okno_dodania, text='OK', command=usun_pomyslnie_dodano).pack()
